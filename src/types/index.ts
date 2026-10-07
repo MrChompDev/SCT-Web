@@ -46,8 +46,16 @@ export type Newsletter = {
   created_at: string;
 };
 
+export type ProfileRole = "user" | "executive" | "admin";
+
 export type Profile = {
   id: string;
   email: string | null;
-  role: "user" | "executive" | "admin";
+  role: ProfileRole;
+  can_manage_gallery: boolean;
+  can_manage_staff: boolean;
+  can_manage_settings: boolean;
+  can_publish_newsletter: boolean;
+  can_review_applications: boolean;
+  created_at?: string;
 };

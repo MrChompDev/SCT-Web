@@ -16,13 +16,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
 };
 
 export const DEFAULT_STAFF: StaffMember[] = [
-  { id: "s1", name: "Lil_J765", rank: "Chief Executive", division: "Executive", avatar_url: null, sort_order: 1 },
-  { id: "s2", name: "WilliamNOPQ", rank: "Chief Operations Officer", division: "Operations", avatar_url: null, sort_order: 2 },
-  { id: "s3", name: "Shawn", rank: "Staff Development Manager", division: "Development", avatar_url: null, sort_order: 3 },
-  { id: "s4", name: "Money_40", rank: "Operations Manager", division: "Operations", avatar_url: null, sort_order: 4 },
-  { id: "s5", name: "Zandarhip", rank: "Area of Operations Manager", division: "Operations", avatar_url: null, sort_order: 5 },
-  { id: "s6", name: "Natalspy1234", rank: "Tech Operations Manager", division: "Technology", avatar_url: null, sort_order: 6 },
-  { id: "s7", name: "N5WP0L1C3", rank: "Fleet Manager", division: "Fleet", avatar_url: null, sort_order: 7 },
+  { id: "s1", name: "LilJ_765", rank: "Chief Executive", division: "Executive", avatar_url: null, sort_order: 1 },
+  { id: "s2", name: "williamlmnopq", rank: "Chief Operations Officer", division: "Operations", avatar_url: null, sort_order: 2 },
+  { id: "s3", name: "Natalspy1234", rank: "Chief Technologies Officer", division: "Technology", avatar_url: null, sort_order: 3 },
+  { id: "s4", name: "Zandarhip", rank: "Executive", division: "Executive", avatar_url: null, sort_order: 4 },
+  { id: "s5", name: "money_406", rank: "Assistant Executive", division: "Executive", avatar_url: null, sort_order: 5 },
 ];
 
 const GALLERY_CAPTIONS = [

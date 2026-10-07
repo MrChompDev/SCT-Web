@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { LogIn, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { APPLY_FORM_URL } from "@/lib/constants";
 
 const LINKS = [
   { label: "Services", href: "/#services" },
@@ -31,9 +32,9 @@ export default function Navbar({ recruitmentOpen }: NavbarProps) {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-300",
         scrolled || open
-          ? "border-b border-white/10 bg-night-950/90 backdrop-blur-md"
+          ? "border-b border-white/10 bg-night-950"
           : "border-b border-transparent bg-transparent"
       )}
     >
@@ -70,36 +71,34 @@ export default function Navbar({ recruitmentOpen }: NavbarProps) {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 rounded border border-white/15 px-4 py-2 font-display text-sm font-semibold uppercase tracking-wider text-slate-300 transition hover:border-brand-500/50 hover:text-brand-400"
+          >
+            <LogIn size={15} /> Staff Login
+          </Link>
           <span
             className={cn(
-              "flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-widest",
+              "flex items-center gap-2 rounded-sm border px-3 py-1 text-[11px] font-semibold uppercase tracking-widest",
               recruitmentOpen
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/30 bg-red-500/10 text-red-400"
+                ? "border-emerald-500 text-emerald-400"
+                : "border-red-500 text-red-400"
             )}
           >
-            <span className="relative flex h-2 w-2">
-              <span
-                className={cn(
-                  "absolute inline-flex h-full w-full animate-ping rounded-full opacity-60",
-                  recruitmentOpen ? "bg-emerald-400" : "bg-red-400"
-                )}
-              />
-              <span
-                className={cn(
-                  "relative inline-flex h-2 w-2 rounded-full",
-                  recruitmentOpen ? "bg-emerald-400" : "bg-red-400"
-                )}
-              />
-            </span>
+            <span
+              className={cn(
+                "h-2 w-2",
+                recruitmentOpen ? "bg-emerald-400" : "bg-red-400"
+              )}
+            />
             {recruitmentOpen ? "Recruitment Open" : "Recruitment Closed"}
           </span>
-          <Link
-            href="/apply"
-            className="rounded bg-brand-500 px-4 py-2 font-display text-sm font-semibold uppercase tracking-wider text-night-950 shadow-lg shadow-brand-500/20 transition hover:bg-brand-400"
+          <a
+            href={APPLY_FORM_URL}
+            className="rounded-sm bg-brand-500 px-4 py-2 font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition-colors hover:bg-brand-400"
           >
             Apply Now
-          </Link>
+          </a>
         </div>
 
         <button
@@ -112,7 +111,7 @@ export default function Navbar({ recruitmentOpen }: NavbarProps) {
       </div>
 
       {open && (
-        <div className="border-t border-white/10 bg-night-950/95 px-4 pb-6 pt-2 backdrop-blur-md lg:hidden">
+        <div className="border-t border-white/10 bg-night-950 px-4 pb-6 pt-2 lg:hidden">
           <nav className="flex flex-col gap-1">
             {LINKS.map((link) => (
               <Link
@@ -124,6 +123,14 @@ export default function Navbar({ recruitmentOpen }: NavbarProps) {
                 {link.label}
               </Link>
             ))}
+            <span className="my-1 h-px bg-white/10" />
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 rounded px-3 py-3 font-display text-base font-semibold uppercase tracking-widest text-brand-400 transition hover:bg-white/5"
+            >
+              <LogIn size={16} /> Staff Login
+            </Link>
           </nav>
           <div className="mt-4 flex items-center justify-between gap-3">
             <span
@@ -134,13 +141,13 @@ export default function Navbar({ recruitmentOpen }: NavbarProps) {
             >
               {recruitmentOpen ? "● Recruitment Open" : "● Recruitment Closed"}
             </span>
-            <Link
-              href="/apply"
+            <a
+              href={APPLY_FORM_URL}
               onClick={() => setOpen(false)}
               className="rounded bg-brand-500 px-4 py-2 font-display text-sm font-semibold uppercase tracking-wider text-night-950"
             >
               Apply Now
-            </Link>
+            </a>
           </div>
         </div>
       )}

@@ -5,10 +5,12 @@ import {
   ClipboardList,
   Images,
   Newspaper,
+  UserCog,
   Users,
 } from "lucide-react";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { getProfile, permsFor } from "@/lib/auth";
 import { timeAgo } from "@/lib/utils";
 import type { Application } from "@/types";
 
@@ -22,15 +24,16 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default async function AdminDashboard() {
   if (!isSupabaseConfigured) return null; // layout renders the setup notice
-  const supabase = await getSupabaseServerClient();
+  const profile = await getProfile();
+  const perms = permsFor(profile);
 
-  const [appsPending, appsTotal, staff, gallery, posts, settings, recent] =
+  const supabase = await getSupabaseServerClient();
+  const [appsPending, staff, gallery, posts, settings, recent] =
     await Promise.all([
       supabase
         .from("applications")
         .select("id", { count: "exact", head: true })
         .eq("status", "pending"),
-      supabase.from("applications").select("id", { count: "exact", head: true }),
       supabase.from("staff_members").select("id", { count: "exact", head: true }),
       supabase.from("gallery").select("id", { count: "exact", head: true }),
       supabase.from("newsletters").select("id", { count: "exact", head: true }),
@@ -46,17 +49,52 @@ export default async function AdminDashboard() {
   const recruitmentOpen = settings.data?.recruitment_open ?? true;
 
   const stats = [
-    {
+    perms.applications && {
       label: "Pending Applications",
-      value: appsPending.count ?? 0,
+      value: String(appsPending.count ?? 0),
       icon: ClipboardList,
       href: "/admin/applications",
       accent: (appsPending.count ?? 0) > 0,
     },
-    { label: "Command Staff", value: staff.count ?? 0, icon: Users, href: "/admin/staff" },
-    { label: "Gallery Images", value: gallery.count ?? 0, icon: Images, href: "/admin/gallery" },
-    { label: "Sitreps Published", value: posts.count ?? 0, icon: Newspaper, href: "/admin/newsletter" },
-  ];
+    perms.staff && {
+      label: "Command Staff",
+      value: String(staff.count ?? 0),
+      icon: Users,
+      href: "/admin/staff",
+    },
+    perms.gallery && {
+      label: "Gallery Images",
+      value: String(gallery.count ?? 0),
+      icon: Images,
+      href: "/admin/gallery",
+    },
+    perms.newsletter && {
+      label: "Sitreps Published",
+      value: String(posts.count ?? 0),
+      icon: Newspaper,
+      href: "/admin/newsletter",
+    },
+    perms.team && {
+      label: "Team Accounts",
+      value: "🛡",
+      icon: UserCog,
+      href: "/admin/team",
+    },
+  ].filter(Boolean) as Array<{
+    label: string;
+    value: string;
+    icon: typeof Users;
+    href: string;
+    accent?: boolean;
+  }>;
+
+  const quickActions = [
+    perms.newsletter && { label: "Publish a weekly sitrep", href: "/admin/newsletter" },
+    perms.staff && { label: "Add a command member", href: "/admin/staff" },
+    perms.gallery && { label: "Upload on-the-job shots", href: "/admin/gallery" },
+    perms.settings && { label: "Toggle recruitment / hero text", href: "/admin/settings" },
+    perms.team && { label: "Grant someone permissions", href: "/admin/team" },
+  ].filter(Boolean) as Array<{ label: string; href: string }>;
 
   const recentApps = (recent.data ?? []) as Application[];
 
@@ -72,10 +110,10 @@ export default async function AdminDashboard() {
           </h1>
         </div>
         <span
-          className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-widest ${
+          className={`rounded-sm border px-4 py-1.5 text-xs font-semibold uppercase tracking-widest ${
             recruitmentOpen
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-              : "border-red-500/30 bg-red-500/10 text-red-400"
+              ? "border-emerald-500 text-emerald-400"
+              : "border-red-500 text-red-400"
           }`}
         >
           Recruitment {recruitmentOpen ? "Open" : "Closed"}
@@ -83,7 +121,7 @@ export default async function AdminDashboard() {
       </div>
 
       {!schemaReady && (
-        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+        <div className="mt-6 flex items-start gap-3 rounded-sm border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-300">
           <AlertTriangle size={16} className="mt-0.5 shrink-0" />
           <p>
             Couldn't read the database — make sure you've run{" "}
@@ -98,7 +136,7 @@ export default async function AdminDashboard() {
           <Link
             key={stat.label}
             href={stat.href}
-            className={`card p-5 transition hover:-translate-y-0.5 hover:border-brand-500/40 ${
+            className={`card p-5 transition-colors hover:border-brand-500/40 ${
               stat.accent ? "border-brand-500/40 bg-brand-500/[0.06]" : ""
             }`}
           >
@@ -114,62 +152,60 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="mt-8 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-        <div className="card p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white">
-              Latest Applications
-            </h2>
-            <Link
-              href="/admin/applications"
-              className="inline-flex items-center gap-1 font-display text-xs font-semibold uppercase tracking-widest text-brand-400 hover:underline"
-            >
-              View all <ArrowRight size={12} />
-            </Link>
+        {perms.applications && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white">
+                Latest Applications
+              </h2>
+              <Link
+                href="/admin/applications"
+                className="inline-flex items-center gap-1 font-display text-xs font-semibold uppercase tracking-widest text-brand-400 hover:underline"
+              >
+                View all <ArrowRight size={12} />
+              </Link>
+            </div>
+            {recentApps.length === 0 ? (
+              <p className="mt-6 text-sm text-slate-500">
+                No applications yet — the public form now lives on melonly.xyz,
+                so entries only appear here if it's wired back up.
+              </p>
+            ) : (
+              <ul className="mt-5 divide-y divide-white/5">
+                {recentApps.map((app) => (
+                  <li key={app.id} className="flex items-center justify-between gap-3 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-display text-sm font-semibold uppercase tracking-wide text-white">
+                        {app.roblox_username}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        @{app.discord_username} · {timeAgo(app.created_at)}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-md px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-widest ring-1 ${
+                        STATUS_STYLES[app.status]
+                      }`}
+                    >
+                      {app.status}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          {recentApps.length === 0 ? (
-            <p className="mt-6 text-sm text-slate-500">
-              No applications yet. When crew hopefuls hit /apply, they'll land here.
-            </p>
-          ) : (
-            <ul className="mt-5 divide-y divide-white/5">
-              {recentApps.map((app) => (
-                <li key={app.id} className="flex items-center justify-between gap-3 py-3">
-                  <div className="min-w-0">
-                    <p className="truncate font-display text-sm font-semibold uppercase tracking-wide text-white">
-                      {app.roblox_username}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      @{app.discord_username} · {timeAgo(app.created_at)}
-                    </p>
-                  </div>
-                  <span
-                    className={`shrink-0 rounded-md px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-widest ring-1 ${
-                      STATUS_STYLES[app.status]
-                    }`}
-                  >
-                    {app.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        )}
 
         <div className="card p-6">
           <h2 className="font-display text-lg font-bold uppercase tracking-wide text-white">
             Quick Actions
           </h2>
           <div className="mt-5 space-y-2.5">
-            {[
-              { label: "Publish a weekly sitrep", href: "/admin/newsletter" },
-              { label: "Add a command member", href: "/admin/staff" },
-              { label: "Upload on-the-job shots", href: "/admin/gallery" },
-              { label: "Toggle recruitment / hero text", href: "/admin/settings" },
-            ].map((action) => (
+            {quickActions.map((action) => (
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex items-center justify-between rounded-lg border border-white/10 px-4 py-3 text-sm text-slate-300 transition hover:border-brand-500/40 hover:text-brand-400"
+                className="flex items-center justify-between rounded-sm border border-white/10 px-4 py-3 text-sm text-slate-300 transition-colors hover:border-brand-500/40 hover:text-brand-400"
               >
                 {action.label}
                 <ArrowRight size={14} />

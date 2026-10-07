@@ -26,13 +26,7 @@ export default function SectionHeading({
       {sub && (
         <p className="mt-4 text-base leading-relaxed text-slate-400">{sub}</p>
       )}
-      <div
-        className={
-          align === "center"
-            ? "mx-auto mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-transparent via-brand-500 to-transparent"
-            : "mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-brand-500 to-transparent"
-        }
-      />
+      <div className="mt-6 h-1 w-16 bg-brand-500" />
     </div>
   );
 }

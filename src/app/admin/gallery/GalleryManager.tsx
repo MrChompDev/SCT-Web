@@ -117,7 +117,7 @@ export default function GalleryManager({
             public gallery instantly.
           </p>
         </div>
-        <label className="cursor-pointer rounded-lg bg-brand-500 px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-wider text-night-950 shadow-lg shadow-brand-500/20 transition hover:bg-brand-400">
+        <label className="cursor-pointer rounded-sm bg-brand-500 px-5 py-2.5 font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition-colors hover:bg-brand-400">
           <UploadCloud size={16} className="mr-2 inline" />
           Browse Files
           <input
@@ -142,7 +142,7 @@ export default function GalleryManager({
           void uploadFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "mt-8 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-10 text-center transition",
+          "mt-8 flex flex-col items-center justify-center gap-3 rounded-md border border-dashed p-10 text-center transition-colors",
           dragging
             ? "border-brand-500 bg-brand-500/5"
             : "border-white/15 bg-night-900/40"
@@ -164,7 +164,7 @@ export default function GalleryManager({
       </div>
 
       {error && (
-        <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+        <p className="mt-4 rounded-sm border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
           {error}
         </p>
       )}
@@ -190,7 +190,7 @@ export default function GalleryManager({
                 }
                 onBlur={() => setConfirmDelete(null)}
                 className={cn(
-                  "absolute right-2.5 top-2.5 rounded-lg p-2 backdrop-blur transition",
+                  "absolute right-2.5 top-2.5 rounded-sm p-2 transition",
                   confirmDelete === item.id
                     ? "bg-red-500 text-white"
                     : "bg-night-950/70 text-slate-300 opacity-0 group-hover:opacity-100 hover:text-red-400"

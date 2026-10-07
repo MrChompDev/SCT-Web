@@ -23,13 +23,6 @@ const config: Config = {
         display: ["var(--font-display)", "sans-serif"],
         sans: ["var(--font-sans)", "sans-serif"],
       },
-      keyframes: {
-        "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(245,165,36,0.25)" },
-          "50%": { boxShadow: "0 0 40px rgba(245,165,36,0.5)" },
-        },
-      },
-      animation: { "pulse-glow": "pulse-glow 3s ease-in-out infinite" },
     },
   },
   plugins: [],

@@ -8,7 +8,10 @@ import { createServerClient } from "@supabase/ssr";
  */
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Newer Supabase projects call the anon key the "publishable key" — accept either name.
+  const anonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   let response = NextResponse.next({ request });
 

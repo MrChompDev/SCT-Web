@@ -36,13 +36,13 @@ body {
 
 @layer components {
   .field {
-    @apply w-full rounded-lg border border-white/10 bg-night-800/80 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-brand-500/60 focus:ring-2 focus:ring-brand-500/20;
+    @apply w-full rounded-sm border border-white/10 bg-night-800 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-600 outline-none transition focus:border-brand-500;
   }
   .field-label {
     @apply mb-1.5 block font-display text-xs font-semibold uppercase tracking-widest text-slate-400;
   }
   .card {
-    @apply rounded-2xl border border-white/10 bg-night-900/80;
+    @apply rounded-md border border-white/10 bg-night-900;
   }
 }
 

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { announceNewsletter, logAdminAction } from "@/lib/discord";
+import { hasAnyPermission, permsFor } from "@/lib/auth";
+import type { Profile } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -8,28 +10,31 @@ type ActionBody =
   | { type: "audit"; action: string; details?: string }
   | { type: "announce"; title: string; body: string; pingEveryone?: boolean };
 
-/** Verifies the caller is an executive before touching any webhook. */
-async function requireExecutive() {
+/** Verifies the caller is a dashboard user (any permission) before anything. */
+async function requireProfile(): Promise<
+  { profile: Profile } | { error: NextResponse }
+> {
   const supabase = await getSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
-
+  if (!user) {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  }
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("*")
     .eq("id", user.id)
-    .maybeSingle();
-  if (!profile || !["executive", "admin"].includes(profile.role)) {
+    .maybeSingle<Profile>();
+  if (!profile) {
     return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
-  return { user };
+  return { profile };
 }
 
 export async function POST(request: Request) {
-  const auth = await requireExecutive();
-  if (auth.error) return auth.error;
+  const auth = await requireProfile();
+  if ("error" in auth) return auth.error;
 
   let body: ActionBody;
   try {
@@ -38,11 +43,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const actor = auth.user.email ?? auth.user.id;
+  const actor = auth.profile.email ?? auth.profile.id;
+  const perms = permsFor(auth.profile);
 
   switch (body.type) {
-    // Trigger 3 — silent audit log → #admin-logs
+    // Trigger 3 — silent audit log → #admin-logs (any dashboard user)
     case "audit": {
+      if (!hasAnyPermission(perms)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       try {
         const supabase = await getSupabaseServerClient();
         await supabase.from("audit_logs").insert({
@@ -57,8 +66,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // Trigger 2 — newsletter publish → #announcements
+    // Trigger 2 — newsletter publish → #announcements (needs newsletter perm)
     case "announce": {
+      if (!perms.newsletter) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       if (!body.title?.trim() || !body.body?.trim()) {
         return NextResponse.json(
           { error: "Title and body are required." },

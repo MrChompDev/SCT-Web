@@ -7,15 +7,12 @@ out
 next-env.d.ts
 *.tsbuildinfo
 
-# env
+# env — never commit real keys. `.env.example` is the only tracked env file.
 .env*
 !.env.example
-.env.local
 
 # original design assets (optimized copies live in public/images)
 Assets/
 
 # misc
 .DS_Store
-.env.local
-.env.local

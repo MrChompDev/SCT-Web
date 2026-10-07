@@ -81,10 +81,10 @@ export default function SettingsForm({ initial }: { initial: SiteSettings }) {
               <img
                 src={form.logo_url}
                 alt="site logo"
-                className="h-16 w-16 rounded-xl bg-night-800 object-contain ring-1 ring-white/10"
+                className="h-16 w-16 rounded-md bg-night-800 object-contain ring-1 ring-white/10"
               />
             ) : (
-              <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-night-800 font-display text-xs font-bold uppercase tracking-widest text-slate-500 ring-1 ring-white/10">
+              <span className="flex h-16 w-16 items-center justify-center rounded-md bg-night-800 font-display text-xs font-bold uppercase tracking-widest text-slate-500 ring-1 ring-white/10">
                 Default
               </span>
             )}
@@ -160,13 +160,13 @@ export default function SettingsForm({ initial }: { initial: SiteSettings }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-night-800/50 p-4">
+        <div className="flex items-center justify-between rounded-md border border-white/10 bg-night-800/50 p-4">
           <div>
             <p className="font-display text-sm font-semibold uppercase tracking-wider text-white">
               Recruitment Status
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              Controls the status pill on the site and the /apply page banner.
+              Controls the status pill shown across the public site.
             </p>
           </div>
           <button
@@ -186,12 +186,12 @@ export default function SettingsForm({ initial }: { initial: SiteSettings }) {
         </div>
 
         {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+          <p className="rounded-sm border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
             {error}
           </p>
         )}
         {status && (
-          <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+          <p className="rounded-sm border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-emerald-300">
             {status}
           </p>
         )}
@@ -199,7 +199,7 @@ export default function SettingsForm({ initial }: { initial: SiteSettings }) {
         <button
           onClick={() => void save()}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-night-950 shadow-lg shadow-brand-500/20 transition hover:bg-brand-400 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-sm bg-brand-500 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition-colors hover:bg-brand-400 disabled:opacity-60"
         >
           {busy ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           Save Settings

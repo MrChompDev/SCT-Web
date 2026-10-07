@@ -302,10 +302,10 @@ export default function StaffManager({ initialStaff }: { initialStaff: StaffMemb
                 <img
                   src={form.avatar_url}
                   alt="avatar preview"
-                  className="h-16 w-16 rounded-xl object-cover ring-1 ring-white/10"
+                  className="h-16 w-16 rounded-md object-cover ring-1 ring-white/10"
                 />
               ) : (
-                <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-night-800 font-display text-xl font-bold text-brand-400 ring-1 ring-white/10">
+                <span className="flex h-16 w-16 items-center justify-center rounded-md bg-night-800 font-display text-xl font-bold text-brand-400 ring-1 ring-white/10">
                   {initials(form.name) || "?"}
                 </span>
               )}

@@ -68,12 +68,12 @@ export default function ServicesBento() {
           {SERVICES.map((service) => (
             <div
               key={service.title}
-              className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 ${
+              className={`group relative overflow-hidden rounded-md border transition-colors ${
                 service.wide ? "md:col-span-2" : ""
               } ${
                 service.accent
-                  ? "border-brand-500/30 bg-brand-500/[0.07]"
-                  : "border-white/10 bg-night-900/80 hover:border-brand-500/40 hover:shadow-xl hover:shadow-brand-500/10"
+                  ? "border-brand-500/40 bg-brand-500/10"
+                  : "border-white/10 bg-night-900 hover:border-brand-500/40"
               }`}
             >
               {service.image && (
@@ -83,14 +83,14 @@ export default function ServicesBento() {
                     alt="Heavy recovery operation"
                     fill
                     sizes="(min-width: 768px) 66vw, 100vw"
-                    className="object-cover opacity-45 transition duration-500 group-hover:scale-105 group-hover:opacity-55"
+                    className="object-cover opacity-45"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-night-950 via-night-950/60 to-transparent" />
+                  <div className="absolute inset-0 bg-night-950/60" />
                 </>
               )}
               <div className="relative flex h-full flex-col p-6 sm:p-8">
                 <span
-                  className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${
+                  className={`inline-flex h-12 w-12 items-center justify-center rounded-sm ${
                     service.accent || service.image
                       ? "bg-brand-500 text-night-950"
                       : "bg-night-800 text-brand-400 ring-1 ring-white/10 transition group-hover:bg-brand-500 group-hover:text-night-950"
@@ -110,7 +110,7 @@ export default function ServicesBento() {
                 </p>
                 {service.image && (
                   <span className="mt-4 inline-flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-widest text-brand-400">
-                    <span className="hazard h-1 w-10 rounded-full" />
+                    <span className="hazard h-1 w-10" />
                     Heavy Division
                   </span>
                 )}

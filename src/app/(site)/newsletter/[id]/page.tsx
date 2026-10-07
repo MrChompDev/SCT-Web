@@ -39,13 +39,13 @@ export default async function NewsletterDetailPage({ params }: Props) {
         {formatDate(post.created_at)}
         {post.author ? ` — by ${post.author}` : ""}
       </p>
-      <div className="mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-brand-500 to-transparent" />
+      <div className="mt-6 h-1 w-16 bg-brand-500" />
 
       <div className="prose-invert mt-10 whitespace-pre-line text-base leading-relaxed text-slate-300">
         {post.body}
       </div>
 
-      <div className="hazard mt-14 h-2 rounded-full opacity-60" />
+      <div className="hazard mt-14 h-2 opacity-60" />
     </article>
   );
 }

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { Database, ShieldX } from "lucide-react";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 import { getSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase-server";
+import { hasAnyPermission, permsFor } from "@/lib/auth";
+import type { Permissions } from "@/lib/auth";
 import type { Profile } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -53,13 +55,15 @@ export default async function AdminLayout({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
+  const { data } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle<Profile>();
+  const profile = data ?? null;
+  const perms = permsFor(profile);
 
-  if (!profile || !["executive", "admin"].includes(profile.role)) {
+  if (!profile || !hasAnyPermission(perms)) {
     // First user through the door bootstraps as executive (see README).
     const { data: claimed } = await supabase.rpc("claim_first_executive");
     if (claimed === "promoted") {
@@ -74,9 +78,9 @@ export default async function AdminLayout({
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-slate-400">
             Signed in as <span className="text-white">{user.email}</span>, but
-            this account doesn't hold an executive role. Ask an existing
-            executive to promote you from the database (see README —
-            "Promoting additional executives").
+            this account hasn't been granted any dashboard permissions yet.
+            Ask an existing executive to grant them from the dashboard
+            (Team & Permissions).
           </p>
           <Link
             href="/"
@@ -91,7 +95,11 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-night-950">
-      <AdminSidebar email={user.email ?? "crew member"} role={profile.role} />
+      <AdminSidebar
+        email={user.email ?? "crew member"}
+        role={profile?.role ?? "user"}
+        perms={perms}
+      />
       <div className="lg:pl-64">
         <div className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">{children}</div>
       </div>

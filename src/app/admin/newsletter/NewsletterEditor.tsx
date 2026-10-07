@@ -153,7 +153,7 @@ export default function NewsletterEditor({
             <button
               onClick={() => void publish()}
               disabled={busy}
-              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-night-950 shadow-lg shadow-brand-500/20 transition hover:bg-brand-400 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-sm bg-brand-500 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition-colors hover:bg-brand-400 disabled:opacity-60"
             >
               {busy ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               Publish Sitrep

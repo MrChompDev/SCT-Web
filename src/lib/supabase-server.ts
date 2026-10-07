@@ -3,7 +3,11 @@ import { cookies } from "next/headers";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+// Newer Supabase projects call the anon key the "publishable key" — accept either name.
+const SUPABASE_ANON_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  "";
 
 export { isSupabaseConfigured };
 

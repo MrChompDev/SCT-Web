@@ -27,7 +27,7 @@ export default async function NewsletterPage() {
         Operational milestones, fleet news and crew announcements — published
         by Command and mirrored to our Discord.
       </p>
-      <div className="mt-8 h-1 w-16 rounded-full bg-gradient-to-r from-brand-500 to-transparent" />
+      <div className="mt-8 h-1 w-16 bg-brand-500" />
 
       {posts.length === 0 ? (
         <div className="card mt-12 flex flex-col items-center gap-3 p-12 text-center">
@@ -46,10 +46,10 @@ export default async function NewsletterPage() {
             <Link
               key={post.id}
               href={`/newsletter/${post.id}`}
-              className="group block rounded-2xl border border-white/10 bg-night-900/80 p-6 transition hover:border-brand-500/40 sm:p-8"
+              className="group block rounded-md border border-white/10 bg-night-900 p-6 transition-colors hover:border-brand-500 sm:p-8"
             >
               <div className="flex items-center gap-3">
-                <span className="rounded-lg bg-brand-500/10 p-2 text-brand-400 ring-1 ring-brand-500/25">
+                <span className="rounded-sm bg-night-800 p-2 text-brand-400">
                   <Newspaper size={15} />
                 </span>
                 <p className="font-display text-xs font-semibold uppercase tracking-widest text-slate-500">

@@ -64,7 +64,7 @@ export default function ImageUploader({
         className={cn(
           "group relative flex cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden border border-dashed border-white/15 bg-night-800/60 p-3 text-center transition hover:border-brand-500/50",
           dragging && "border-brand-500 bg-brand-500/5",
-          rounded ? "rounded-full" : "rounded-xl",
+          rounded ? "rounded-full" : "rounded-md",
           rounded ? "aspect-square w-28" : "h-40",
           !rounded && "py-6"
         )}

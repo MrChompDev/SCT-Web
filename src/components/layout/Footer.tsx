@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Youtube } from "lucide-react";
+import { APPLY_FORM_URL } from "@/lib/constants";
 import type { SiteSettings } from "@/types";
 
 const NAV = [
@@ -9,7 +10,8 @@ const NAV = [
   { label: "Command", href: "/#command" },
   { label: "Gallery", href: "/#gallery" },
   { label: "Updates", href: "/newsletter" },
-  { label: "Apply", href: "/apply" },
+  { label: "Staff Login", href: "/login" },
+  { label: "Apply", href: APPLY_FORM_URL, external: true },
 ];
 
 const DIVISIONS = [
@@ -58,7 +60,7 @@ export default function Footer({ settings }: { settings: SiteSettings }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-brand-500/50 hover:text-brand-400"
+                className="rounded-sm border border-white/10 p-2 text-slate-400 transition-colors hover:border-brand-500/50 hover:text-brand-400"
               >
                 <Icon size={16} />
               </a>
@@ -73,12 +75,21 @@ export default function Footer({ settings }: { settings: SiteSettings }) {
           <ul className="mt-4 space-y-2.5">
             {NAV.map((item) => (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="text-sm text-slate-400 transition hover:text-brand-400"
-                >
-                  {item.label}
-                </Link>
+                {"external" in item && item.external ? (
+                  <a
+                    href={item.href}
+                    className="text-sm text-slate-400 transition hover:text-brand-400"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="text-sm text-slate-400 transition hover:text-brand-400"
+                  >
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -107,18 +118,18 @@ export default function Footer({ settings }: { settings: SiteSettings }) {
             busiest virtual tow crew?
           </p>
           <div className="mt-4 flex flex-col gap-2.5">
-            <Link
-              href="/apply"
-              className="rounded bg-brand-500 px-4 py-2.5 text-center font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition hover:bg-brand-400"
+            <a
+              href={APPLY_FORM_URL}
+              className="rounded-sm bg-brand-500 px-4 py-2.5 text-center font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition-colors hover:bg-brand-400"
             >
               Apply Now
-            </Link>
+            </a>
             {settings.discord_url && (
               <a
                 href={settings.discord_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded border border-white/15 px-4 py-2.5 text-center font-display text-sm font-semibold uppercase tracking-wider text-slate-200 transition hover:border-brand-500/50 hover:text-brand-400"
+                className="rounded-sm border border-white/20 px-4 py-2.5 text-center font-display text-sm font-semibold uppercase tracking-wider text-slate-200 transition-colors hover:border-brand-500/50 hover:text-brand-400"
               >
                 Discord Community
               </a>

@@ -21,10 +21,10 @@ export default function NewsletterPreview({ posts }: { posts: Newsletter[] }) {
             <Link
               key={post.id}
               href={`/newsletter/${post.id}`}
-              className="group rounded-2xl border border-white/10 bg-night-900/80 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-xl hover:shadow-brand-500/10 sm:p-7"
+              className="group rounded-md border border-white/10 bg-night-900 p-6 transition-colors hover:border-brand-500 sm:p-7"
             >
               <div className="flex items-center gap-3">
-                <span className="rounded-lg bg-brand-500/10 p-2 text-brand-400 ring-1 ring-brand-500/25">
+                <span className="rounded-sm bg-night-800 p-2 text-brand-400">
                   <Newspaper size={16} />
                 </span>
                 <p className="font-display text-xs font-semibold uppercase tracking-widest text-slate-500">
@@ -48,7 +48,7 @@ export default function NewsletterPreview({ posts }: { posts: Newsletter[] }) {
         <div className="mt-10 text-center">
           <Link
             href="/newsletter"
-            className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-white transition hover:border-brand-500/60 hover:text-brand-400"
+            className="inline-flex items-center gap-2 rounded-sm border border-white/20 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:border-brand-500 hover:text-brand-400"
           >
             All Updates <ArrowRight size={16} />
           </Link>
