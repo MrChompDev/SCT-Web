@@ -43,15 +43,20 @@ export default function SettingsForm({ initial }: { initial: SiteSettings }) {
     setStatus(null);
     try {
       const supabase = getSupabaseBrowserClient();
-      const { error } = await supabase.from("site_settings").upsert({
-        id: 1,
-        hero_heading: form.hero_heading.trim() || null,
-        hero_subtext: form.hero_subtext.trim() || null,
-        logo_url: form.logo_url,
-        recruitment_open: form.recruitment_open,
-        discord_url: form.discord_url?.trim() || null,
-        updated_at: new Date().toISOString(),
-      });
+      // .update() (not .upsert()) — the row is seeded with id=1 and the
+      // site_settings table only has an UPDATE policy, so an upsert's
+      // implicit INSERT is refused by RLS with a 403.
+      const { error } = await supabase
+        .from("site_settings")
+        .update({
+          hero_heading: form.hero_heading.trim() || null,
+          hero_subtext: form.hero_subtext.trim() || null,
+          logo_url: form.logo_url,
+          recruitment_open: form.recruitment_open,
+          discord_url: form.discord_url?.trim() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", 1);
       if (error) throw error;
       setStatus("Settings saved — the public site has been updated.");
       void audit("Site settings updated");

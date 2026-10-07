@@ -132,6 +132,7 @@ drop policy if exists "exec insert gallery"          on public.gallery;
 drop policy if exists "exec update gallery"          on public.gallery;
 drop policy if exists "exec delete gallery"         on public.gallery;
 drop policy if exists "public read settings"         on public.site_settings;
+drop policy if exists "exec insert settings"         on public.site_settings;
 drop policy if exists "exec update settings"         on public.site_settings;
 drop policy if exists "anon submit applications"     on public.applications;
 drop policy if exists "exec read applications"      on public.applications;
@@ -317,9 +318,11 @@ create policy "exec update gallery" on public.gallery
 create policy "exec delete gallery" on public.gallery
   for delete using (internal.can_manage_gallery());
 
--- site_settings: public read, permitted users update (logo, hero text, toggles)
+-- site_settings: public read, permitted users manage (logo, hero text, toggles)
 create policy "public read settings" on public.site_settings
   for select using (true);
+create policy "exec insert settings" on public.site_settings
+  for insert with check (internal.can_manage_settings());
 create policy "exec update settings" on public.site_settings
   for update using (internal.can_manage_settings());
 
