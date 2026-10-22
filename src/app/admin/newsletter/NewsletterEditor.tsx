@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Newspaper, Send, Trash2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
+import {
+  ImagePlus,
+  Loader2,
+  Newspaper,
+  RefreshCw,
+  Send,
+  Trash2,
+} from "lucide-react";
+import { cn, formatDate, resizeImage } from "@/lib/utils";
+import { getSupabaseBrowserClient, supabaseStorageUrl } from "@/lib/supabase";
 import type { Newsletter } from "@/types";
 
 async function audit(action: string, details?: string) {
@@ -25,7 +32,11 @@ export default function NewsletterEditor({
   initialPosts: Newsletter[];
 }) {
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [posts, setPosts] = useState<Newsletter[]>(initialPosts);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [ping, setPing] = useState(true);
@@ -34,11 +45,41 @@ export default function NewsletterEditor({
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  async function publish() {
-    if (!title.trim() || !body.trim()) {
-      setError("Give the sitrep a title and a body.");
+  async function uploadImage(file: File | undefined) {
+    if (!file || uploading || busy) return;
+    if (!file.type.startsWith("image/")) {
+      setError("That's not an image file — PNG, JPG or WebP please.");
       return;
     }
+    setError(null);
+    setUploading(true);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const resized = await resizeImage(file, 1600, 0.85);
+      const path = `newsletters/${crypto.randomUUID()}.${
+        resized.name.split(".").pop() ?? "webp"
+      }`;
+      const { error: upErr } = await supabase.storage
+        .from("site-assets")
+        .upload(path, resized, { contentType: resized.type });
+      if (upErr) throw upErr;
+      setImageUrl(supabaseStorageUrl(`site-assets/${path}`));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Image upload failed");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  async function publish() {
+    if (!imageUrl) {
+      setError("Upload the newsletter image first — that's the post.");
+      return;
+    }
+    const finalTitle =
+      title.trim() || `Weekly Sitrep — ${formatDate(new Date())}`;
+    const finalBody = body.trim();
     setBusy(true);
     setError(null);
     setStatus(null);
@@ -46,7 +87,13 @@ export default function NewsletterEditor({
       const supabase = getSupabaseBrowserClient();
       const { data, error: dbErr } = await supabase
         .from("newsletters")
-        .insert({ title: title.trim(), body: body.trim(), author: "Command Team", published: true })
+        .insert({
+          title: finalTitle,
+          body: finalBody,
+          author: "Command Team",
+          image_url: imageUrl,
+          published: true,
+        })
         .select()
         .single();
       if (dbErr) throw dbErr;
@@ -55,11 +102,18 @@ export default function NewsletterEditor({
       const res = await fetch("/api/admin/actions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "announce", title: title.trim(), body: body.trim(), pingEveryone: ping }),
+        body: JSON.stringify({
+          type: "announce",
+          title: finalTitle,
+          body: finalBody,
+          image_url: imageUrl,
+          pingEveryone: ping,
+        }),
       });
       const delivered = res.ok;
 
       setPosts((cur) => [data as Newsletter, ...cur]);
+      setImageUrl(null);
       setTitle("");
       setBody("");
       setStatus(
@@ -67,7 +121,7 @@ export default function NewsletterEditor({
           ? "Published to the site and announced on Discord."
           : "Published to the site — but the Discord announcement couldn't be delivered. Check the webhook URL in your env settings."
       );
-      void audit("Sitrep published", title.trim());
+      void audit("Sitrep published", finalTitle);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Publish failed");
@@ -79,7 +133,10 @@ export default function NewsletterEditor({
   async function remove(post: Newsletter) {
     try {
       const supabase = getSupabaseBrowserClient();
-      const { error } = await supabase.from("newsletters").delete().eq("id", post.id);
+      const { error } = await supabase
+        .from("newsletters")
+        .delete()
+        .eq("id", post.id);
       if (error) throw error;
       setPosts((cur) => cur.filter((p) => p.id !== post.id));
       setConfirmDelete(null);
@@ -99,8 +156,9 @@ export default function NewsletterEditor({
         Sitrep Editor
       </h1>
       <p className="mt-2 max-w-xl text-sm text-slate-400">
-        Write the weekly newsletter. Publishing pushes it to the public site
-        and fires the #announcements Discord webhook simultaneously.
+        Upload the newsletter image and publish it — it goes straight to the
+        public site and the #announcements Discord webhook with the image
+        attached. Title and description are optional extras.
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
@@ -110,22 +168,91 @@ export default function NewsletterEditor({
           </h2>
           <div className="mt-5 space-y-4">
             <div>
-              <label className="field-label">Title *</label>
+              <label className="field-label">Newsletter image *</label>
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragging(false);
+                  void uploadImage(e.dataTransfer.files?.[0]);
+                }}
+                onClick={() => inputRef.current?.click()}
+                className={cn(
+                  "group relative flex cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-md border border-dashed p-4 text-center transition",
+                  dragging
+                    ? "border-brand-500 bg-brand-500/5"
+                    : "border-white/15 bg-night-800/60 hover:border-brand-500/50"
+                )}
+              >
+                {uploading ? (
+                  <div className="flex h-64 w-full items-center justify-center">
+                    <Loader2 size={24} className="animate-spin text-brand-400" />
+                  </div>
+                ) : imageUrl ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt="Newsletter preview"
+                      className="max-h-96 w-full rounded-sm object-contain"
+                    />
+                    <span className="inline-flex items-center gap-1.5 font-display text-xs uppercase tracking-widest text-brand-400">
+                      <RefreshCw size={12} /> Click to replace
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <ImagePlus size={24} className="text-slate-500" />
+                    <span className="font-display text-sm font-semibold uppercase tracking-widest text-slate-300">
+                      Drop the newsletter image here
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      PNG / JPG / WebP — auto-optimised on upload
+                    </span>
+                  </>
+                )}
+              </div>
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => void uploadImage(e.target.files?.[0])}
+              />
+              {imageUrl && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setImageUrl(null);
+                  }}
+                  className="mt-1.5 inline-flex items-center gap-1 text-xs text-slate-500 transition hover:text-red-400"
+                >
+                  <Trash2 size={12} /> Remove image
+                </button>
+              )}
+            </div>
+            <div>
+              <label className="field-label">Title — optional</label>
               <input
                 className="field"
                 value={title}
                 maxLength={150}
-                placeholder="e.g. Weekly Sitrep — New Fleet Arrivals"
+                placeholder="Defaults to “Weekly Sitrep — {today's date}”"
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
             <div>
-              <label className="field-label">Body *</label>
+              <label className="field-label">Description — optional</label>
               <textarea
-                className="field min-h-[220px] resize-y"
+                className="field min-h-[110px] resize-y"
                 value={body}
                 maxLength={4000}
-                placeholder={"Write the update…\n\nLine breaks are preserved on the site and in the Discord embed."}
+                placeholder="Short text for the Discord announcement and sitrep cards (optional)."
                 onChange={(e) => setBody(e.target.value)}
               />
             </div>
@@ -152,7 +279,7 @@ export default function NewsletterEditor({
 
             <button
               onClick={() => void publish()}
-              disabled={busy}
+              disabled={busy || uploading || !imageUrl}
               className="inline-flex items-center gap-2 rounded-sm bg-brand-500 px-6 py-3 font-display text-sm font-semibold uppercase tracking-wider text-night-950 transition-colors hover:bg-brand-400 disabled:opacity-60"
             >
               {busy ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
@@ -169,16 +296,32 @@ export default function NewsletterEditor({
             {posts.map((post) => (
               <div key={post.id} className="card group p-5">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500">
-                      <Newspaper size={12} /> {formatDate(post.created_at)}
-                    </p>
-                    <h3 className="mt-2 font-display text-base font-semibold uppercase leading-snug tracking-wide text-white">
-                      {post.title}
-                    </h3>
-                    <p className="mt-1.5 line-clamp-2 whitespace-pre-line text-sm text-slate-400">
-                      {post.body}
-                    </p>
+                  <div className="flex min-w-0 items-start gap-3">
+                    {post.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.image_url}
+                        alt=""
+                        className="h-16 w-16 shrink-0 rounded-sm border border-white/10 object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-sm border border-white/10 bg-night-800 text-slate-500">
+                        <Newspaper size={18} />
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500">
+                        {formatDate(post.created_at)}
+                      </p>
+                      <h3 className="mt-1 font-display text-base font-semibold uppercase leading-snug tracking-wide text-white">
+                        {post.title}
+                      </h3>
+                      {post.body && (
+                        <p className="mt-1.5 line-clamp-2 whitespace-pre-line text-sm text-slate-400">
+                          {post.body}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={() =>

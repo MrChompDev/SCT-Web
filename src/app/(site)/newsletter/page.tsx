@@ -46,26 +46,38 @@ export default async function NewsletterPage() {
             <Link
               key={post.id}
               href={`/newsletter/${post.id}`}
-              className="group block rounded-md border border-white/10 bg-night-900 p-6 transition-colors hover:border-brand-500 sm:p-8"
+              className="group block overflow-hidden rounded-md border border-white/10 bg-night-900 transition-colors hover:border-brand-500"
             >
-              <div className="flex items-center gap-3">
-                <span className="rounded-sm bg-night-800 p-2 text-brand-400">
-                  <Newspaper size={15} />
+              {post.image_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={post.image_url}
+                  alt={post.title}
+                  className="max-h-[28rem] w-full border-b border-white/10 object-cover"
+                />
+              )}
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center gap-3">
+                  <span className="rounded-sm bg-night-800 p-2 text-brand-400">
+                    <Newspaper size={15} />
+                  </span>
+                  <p className="font-display text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    {formatDate(post.created_at)}
+                    {post.author ? ` — ${post.author}` : ""}
+                  </p>
+                </div>
+                <h2 className="mt-4 font-display text-2xl font-bold uppercase tracking-wide text-white transition group-hover:text-brand-400">
+                  {post.title}
+                </h2>
+                {post.body && (
+                  <p className="mt-2 line-clamp-2 whitespace-pre-line text-sm leading-relaxed text-slate-400">
+                    {post.body}
+                  </p>
+                )}
+                <span className="mt-4 inline-block font-display text-xs font-semibold uppercase tracking-widest text-brand-400">
+                  Read Sitrep →
                 </span>
-                <p className="font-display text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  {formatDate(post.created_at)}
-                  {post.author ? ` — ${post.author}` : ""}
-                </p>
               </div>
-              <h2 className="mt-4 font-display text-2xl font-bold uppercase tracking-wide text-white transition group-hover:text-brand-400">
-                {post.title}
-              </h2>
-              <p className="mt-2 line-clamp-2 whitespace-pre-line text-sm leading-relaxed text-slate-400">
-                {post.body}
-              </p>
-              <span className="mt-4 inline-block font-display text-xs font-semibold uppercase tracking-widest text-brand-400">
-                Read Sitrep →
-              </span>
             </Link>
           ))}
         </div>

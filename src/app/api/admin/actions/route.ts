@@ -8,7 +8,13 @@ export const dynamic = "force-dynamic";
 
 type ActionBody =
   | { type: "audit"; action: string; details?: string }
-  | { type: "announce"; title: string; body: string; pingEveryone?: boolean };
+  | {
+      type: "announce";
+      title: string;
+      body: string;
+      image_url?: string;
+      pingEveryone?: boolean;
+    };
 
 /** Verifies the caller is a dashboard user (any permission) before anything. */
 async function requireProfile(): Promise<
@@ -71,14 +77,18 @@ export async function POST(request: Request) {
       if (!perms.newsletter) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
-      if (!body.title?.trim() || !body.body?.trim()) {
+      if (!body.title?.trim()) {
         return NextResponse.json(
-          { error: "Title and body are required." },
+          { error: "Title is required." },
           { status: 400 }
         );
       }
       const sent = await announceNewsletter(
-        { title: body.title, body: body.body },
+        {
+          title: body.title,
+          body: body.body ?? "",
+          image_url: body.image_url ?? null,
+        },
         Boolean(body.pingEveryone)
       );
       return NextResponse.json({ ok: true, delivered: sent });

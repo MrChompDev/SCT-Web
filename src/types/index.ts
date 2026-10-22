@@ -43,6 +43,7 @@ export type Newsletter = {
   title: string;
   body: string;
   author: string | null;
+  image_url: string | null;
   created_at: string;
 };
 

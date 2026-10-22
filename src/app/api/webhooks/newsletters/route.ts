@@ -52,12 +52,18 @@ function extractSecret(request: Request): string | null {
   return url.searchParams.get("secret");
 }
 
-type ParsedPost = { title: string; body: string; author: string | null };
+type ParsedPost = {
+  title: string;
+  body: string;
+  author: string | null;
+  image_url: string | null;
+};
 
 function extractPost(payload: Record<string, unknown>): ParsedPost | null {
   const embed = Array.isArray(payload.embeds)
     ? (payload.embeds[0] as Record<string, unknown> | undefined)
     : undefined;
+  const embedImage = embed?.image as Record<string, unknown> | undefined;
 
   const title =
     str(payload.title) ??
@@ -75,10 +81,16 @@ function extractPost(payload: Record<string, unknown>): ParsedPost | null {
 
   if (!title || !body) return null;
 
+  const imageRaw =
+    str(payload.image_url) ?? str(payload.image) ?? str(embedImage?.url) ?? null;
+  const image_url =
+    imageRaw && /^https?:\/\//i.test(imageRaw) ? imageRaw : null;
+
   return {
     title: clip(title, MAX_TITLE),
     body: clip(body, MAX_BODY),
     author: str(payload.author) ? clip(str(payload.author)!, MAX_AUTHOR) : null,
+    image_url,
   };
 }
 
@@ -138,6 +150,7 @@ export async function POST(request: Request) {
       title: post.title,
       body: post.body,
       author: post.author ?? "Command Team",
+      image_url: post.image_url,
       published: true,
     })
     .select("id")
@@ -154,7 +167,11 @@ export async function POST(request: Request) {
   let announced = false;
   if (payload.announce === true) {
     announced = await announceNewsletter(
-      { title: post.title, body: post.body },
+      {
+        title: post.title,
+        body: post.body,
+        image_url: post.image_url,
+      },
       payload.pingEveryone === true
     );
   }

@@ -52,6 +52,7 @@ export const DEFAULT_NEWSLETTERS: Newsletter[] = [
     title: "Weekly Sitrep — New Metal Joins The Fleet",
     body: "Command is proud to confirm two new heavy wreckers have joined the rotation this week, cutting heavy-response times across the metro region.\n\nA warm welcome to the four recruits who passed their trial shifts — you've been assigned your divisions and your onboarding officers will be in touch on Discord.\n\nReminder for all crew: when NSWPF or FRNSW have control of a scene, we stage, we wait, we support. Scene discipline keeps us on everyone's good side.",
     author: "Command Team",
+    image_url: null,
     created_at: "2026-09-26T09:00:00.000Z",
   },
   {
@@ -59,6 +60,7 @@ export const DEFAULT_NEWSLETTERS: Newsletter[] = [
     title: "Heavy Division Training Night — This Weekend",
     body: "This Saturday we're running a joint training night with our FRNSW and NSWPF partners covering multi-agency scene protocol, load securement, and rollover up-righting drills.\n\nAll heavy division operators are expected to attend. Light and flatbed crews are welcome to observe — cross-training counts toward your division transfer hours.\n\nMeet at the depot yard, 19:30 AEST. Bring your beacons.",
     author: "Command Team",
+    image_url: null,
     created_at: "2026-09-19T09:00:00.000Z",
   },
 ];

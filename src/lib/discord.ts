@@ -11,6 +11,7 @@ type Embed = {
   description?: string;
   color?: number;
   fields?: EmbedField[];
+  image?: { url: string };
   footer?: { text: string };
   timestamp?: string;
 };
@@ -39,17 +40,19 @@ function clip(text: string | null | undefined, max: number): string {
 
 /** Trigger 2 — newsletter published from the dashboard → #announcements. */
 export async function announceNewsletter(
-  post: Pick<Newsletter, "title" | "body">,
+  post: Pick<Newsletter, "title" | "body" | "image_url">,
   pingEveryone = false
 ): Promise<boolean> {
   const link = SITE_URL ? `${SITE_URL}/newsletter` : "";
+  const description = post.body?.trim() ? clip(post.body, 2000) : undefined;
   return postWebhook(process.env.DISCORD_WEBHOOK_ANNOUNCEMENTS, {
     content: pingEveryone ? "@everyone" : "",
     embeds: [
       {
         title: `📰 ${clip(post.title, 250)}`,
-        description: clip(post.body, 2000),
+        ...(description ? { description } : {}),
         color: BRAND_COLOR,
+        ...(post.image_url ? { image: { url: post.image_url } } : {}),
         ...(link ? { fields: [{ name: "Read online", value: link }] } : {}),
         footer: { text: FOOTER },
         timestamp: new Date().toISOString(),

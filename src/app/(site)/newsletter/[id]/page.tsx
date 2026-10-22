@@ -41,6 +41,15 @@ export default async function NewsletterDetailPage({ params }: Props) {
       </p>
       <div className="mt-6 h-1 w-16 bg-brand-500" />
 
+      {post.image_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={post.image_url}
+          alt={post.title}
+          className="mt-10 w-full rounded-md border border-white/10"
+        />
+      )}
+
       <div className="prose-invert mt-10 whitespace-pre-line text-base leading-relaxed text-slate-300">
         {post.body}
       </div>

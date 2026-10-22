@@ -96,9 +96,12 @@ create table if not exists public.newsletters (
   title      text not null,
   body       text not null,
   author     text,
+  image_url  text,
   published  boolean not null default false,
   created_at timestamptz not null default now()
 );
+alter table public.newsletters
+  add column if not exists image_url text;
 
 -- Audit trail for dashboard activity
 create table if not exists public.audit_logs (
